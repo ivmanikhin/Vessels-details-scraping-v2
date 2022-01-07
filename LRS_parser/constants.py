@@ -1,0 +1,20 @@
+DRIVER_PATH = r"\SeleniumDrivers\chromedriver.exe"
+URL = "https://www.lr.org/en/lrofships/"
+FLAGS_LIST = ['Algeria', 'Antigua & Barbuda', 'Argentina', 'Australia', 'Australia (Naval)', 'Bahamas', 'Bahrain',
+              'Bangladesh', 'Barbados', 'Belgium', 'Belize', 'Bermuda', 'Brazil', 'British Virgin Islands', 'Brunei',
+              'Bulgaria', 'Canada', 'Cape Verde Republic', 'Cayman Islands', 'Chile', 'Chinese Taipei', 'Colombia',
+              'Comoros', 'Cook Islands', 'Cuba', 'Curacao', 'Cyprus', 'Denmark', 'Denmark (DIS)', 'Djibouti',
+              'Dominica', 'Dominican Republic', 'Ecuador', 'Egypt', 'El Salvador', 'Estonia', 'Falkland Islands',
+              'Faroe Islands', 'Finland', 'Flag Not Required', 'Flag not required', 'France',
+              'French International Register', 'Gabon', 'Germany', 'Gibraltar', 'Greece', 'Guatemala', 'Guernsey',
+              'Honduras', 'Hong Kong, China', 'Iceland', 'India', 'Indonesia', 'Ireland', 'Isle Of Man', 'Israel',
+              'Italy', 'Jamaica', 'Japan', 'Jersey', 'Jordan', 'Kazakhstan', 'Korea (South)', 'Kuwait', 'Latvia',
+              'Liberia', 'Libya', 'Lithuania', 'Luxembourg', 'Madeira, Republic Of Portugal', 'Malaysia',
+              'Maldive Islands', 'Malta', 'Marshall Islands', 'Mexico', 'Monaco', 'Morocco', 'Mozambique', 'Namibia',
+              'Netherlands', 'New Zealand', 'Nicaragua', 'Nigeria', 'Niue', 'Norway', 'Norway NIS', 'Oman',
+              'Pakistan', 'Palau', 'Panama', 'Papua New Guinea', 'Paraguay', 'Peru', 'Philippines', 'Portugal',
+              'Portugal (MAR)', 'Qatar', 'Romania', 'Russia', 'Saint Kitts And Nevis',
+              'Saint Vincent & The Grenadines', 'Samoa', 'Saudi Arabia', 'Sierra Leone', 'Singapore', 'South Africa',
+              'Spain', 'Spain (C.S.R.)', 'Sri Lanka', 'Sweden', 'Switzerland', 'Tanzania', 'Tanzania (Zanzibar)',
+              'Thailand', 'Togo', 'Trinidad & Tobago', 'Turkey', 'Tuvalu', 'United Arab Emirates', 'United Kingdom',
+              'United States Of America', 'Unknown', 'Uruguay', 'Vanuatu', 'Vietnam']

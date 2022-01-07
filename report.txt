@@ -1,0 +1,7 @@
+Database length:    45987
+12 links tried
+1 Working links
+Percent of success: 8.33%
+Current vessel:     BOADICEA - Houseboat (1006128)
+App crushed 0 times
+17.12.2021 09:32:36
