@@ -1,6 +1,7 @@
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup as bs
+from time import sleep
 import re
 
 
@@ -44,7 +45,10 @@ def get_all_cnos(first_page=1, last_page=279):
     return all_cnos
 
 
-def get_ship_details(cno):
+def get_ship_details(cno_plus_delay):
+    cno = list(cno_plus_delay)[0]
+    delay = list(cno_plus_delay)[1]
+    print(f"{cno}    {delay}")
     url = "https://www.ccs.org.cn/ccswzen/internationalShipDetail"
     querystring = {"ccsno": str(cno)}
     headers = {
@@ -61,8 +65,13 @@ def get_ship_details(cno):
         "Sec-Fetch-Site": "same-origin",
         "Sec-GPC": "1"
     }
-
-    response = requests.request("GET", url, headers=headers, params=querystring)
+    sleep(delay)
+    for attemp in range(10):
+        try:
+            response = requests.request("GET", url, headers=headers, params=querystring, timeout=5)
+            break
+        except:
+            print("Something went wrong\nRetrying...")
     soup = bs(response.text, "lxml")
     table_headings = soup.find_all("th")
     table_values = soup.find_all("td")

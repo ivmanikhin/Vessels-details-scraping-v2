@@ -8,6 +8,8 @@ import sqlite3
 import re
 import numpy as np
 from tabulate import tabulate
+from multiprocessing import Pool
+from itertools import product
 
 DATA_TYPES = {
     "int": "Integer",
@@ -68,12 +70,17 @@ def read_txt_to_list(filename):
             output_list.append(line.strip())
     return output_list
 
-
+process_number = 5
 cnos_list = read_txt_to_list("CCS_parser/cnos_list.txt")
-search_list = make_search_list(cnos_list, 50)
-for batch in search_list:
-    print(batch)
-    ship_details_df = CCS.parse_list(batch)
+search_list = make_search_list(cnos_list, process_number)
+delays = [0.3 * _ for _ in range(process_number)]
+print(list(zip(search_list[0], delays)))
+
+
+for cnos_batch in search_list:
+    with Pool(len(delays)) as p:
+        ship_details_batch = p.map(CCS.get_ship_details, zip(cnos_batch, delays))
+    ship_details_df = pd.concat(ship_details_batch, axis=0, ignore_index=True)
     print(tabulate(ship_details_df, headers='keys', tablefmt='psql'))
     write_to_sql(ship_details_df, "CCS_details")
 
