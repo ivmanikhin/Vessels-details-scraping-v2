@@ -64,14 +64,21 @@ def get_ship_details(cno):
 
     response = requests.request("GET", url, headers=headers, params=querystring)
     soup = bs(response.text, "lxml")
-    print(soup)
     table_headings = soup.find_all("th")
     table_values = soup.find_all("td")
     for _ in range(len(table_headings)):
-        print(table_headings[_].text)
-        print(table_values[_].text + "\n\n\n\n")
+        table_headings[_] = " ".join(table_headings[_].text.strip().splitlines())
+        table_values[_] = table_values[_].text.strip()
+    ship_details = pd.DataFrame([table_values], columns=table_headings)
+    return ship_details
 
 
+def parse_list(cnos_batch):
+    ships_details_df = pd.DataFrame()
+    for cno in cnos_batch:
+        ships_details_df = ships_details_df.append(get_ship_details(cno), ignore_index=True)
+        print(ships_details_df.shape)
+    return ships_details_df
 
 
 

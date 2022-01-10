@@ -7,6 +7,7 @@ import sqlite3
 # import numpy as np
 import re
 import numpy as np
+from tabulate import tabulate
 
 DATA_TYPES = {
     "int": "Integer",
@@ -40,7 +41,7 @@ def new_column_to_sql(con, df, table_name):
 
 
 def write_to_sql(df, table_name):
-    con = sqlite3.connect('ships_test.db')
+    con = sqlite3.connect('data/ships.db')
     new_column_to_sql(con, df, table_name)
     df.to_sql(name=table_name, con=con, if_exists="append", index=False)
     con.close()
@@ -68,11 +69,17 @@ def read_txt_to_list(filename):
     return output_list
 
 
+cnos_list = read_txt_to_list("CCS_parser/cnos_list.txt")
+search_list = make_search_list(cnos_list, 50)
+for batch in search_list:
+    print(batch)
+    ship_details_df = CCS.parse_list(batch)
+    print(tabulate(ship_details_df, headers='keys', tablefmt='psql'))
+    write_to_sql(ship_details_df, "CCS_details")
 
-CCS.get_ship_details("00D6006")
 
-# cnos_list = read_txt_to_list("CCS_parser\cnos_list.txt")
-# search_list = make_search_list(cnos_list, 100)
-# for batch in search_list:
-#     ship_details_df = CCS.parse_list(batch)
-#     write_to_sql(ship_details_df, "CCS_details")
+
+
+
+# ship_details = CCS.get_ship_details("00D6006")
+# print(tabulate(ship_details, headers='keys', tablefmt="psql"))
