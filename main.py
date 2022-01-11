@@ -43,7 +43,7 @@ def new_column_to_sql(con, df, table_name):
 
 
 def write_to_sql(df, table_name):
-    con = sqlite3.connect('data/ships.db')
+    con = sqlite3.connect('data\ships.db')
     new_column_to_sql(con, df, table_name)
     df.to_sql(name=table_name, con=con, if_exists="append", index=False)
     con.close()
@@ -70,21 +70,25 @@ def read_txt_to_list(filename):
             output_list.append(line.strip())
     return output_list
 
-# process_number = 5
+process_number = 20
 # cnos_list = read_txt_to_list("CCS_parser/cnos_list.txt")
 # search_list = make_search_list(cnos_list, process_number)
 # delays = [0.3 * _ for _ in range(process_number)]
 # print(list(zip(search_list[0], delays)))
 
 
-ship_details = IRS.get_ship_details("62431")
-print(tabulate(ship_details, headers="keys", tablefmt="psql"))
-# for cnos_batch in search_list:
-#     with Pool(len(delays)) as p:
-#         ship_details_batch = p.map(CCS.get_ship_details, zip(cnos_batch, delays))
-#     ship_details_df = pd.concat(ship_details_batch, axis=0, ignore_index=True)
-#     print(tabulate(ship_details_df, headers='keys', tablefmt='psql'))
-    # write_to_sql(ship_details_df, "CCS_details")
+cnos_list = IRS.read_cnos_from_xlsx()
+search_list = make_search_list(cnos_list, process_number)
+
+delays = [0.05 * _ for _ in range(process_number)]
+
+if __name__ == '__main__':
+    for cnos_batch in search_list:
+        with Pool(len(delays)) as p:
+            ship_details_batch = p.map(IRS.get_ship_details, zip(cnos_batch, delays))
+        ship_details_df = pd.concat(ship_details_batch, axis=0, ignore_index=True)
+        print(tabulate(ship_details_df, headers='keys', tablefmt='psql'))
+        write_to_sql(ship_details_df, "IRS_details")
 
 
 

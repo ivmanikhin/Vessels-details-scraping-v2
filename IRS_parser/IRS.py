@@ -1,9 +1,16 @@
 import requests
 from bs4 import BeautifulSoup as bs
 import pandas as pd
+from time import sleep
 
 
-def get_ship_details(cno):
+def get_ship_details(cno_and_delay):
+    if isinstance(cno_and_delay, tuple):
+        cno = cno_and_delay[0]
+        delay = cno_and_delay[1]
+    else:
+        cno = cno_and_delay
+        delay = 0
     url = f"https://irclass.org/umbraco/Surface/Home/_ShipSearchDetail/{cno}"
     headers = {
       'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:95.0) Gecko/20100101 Firefox/95.0',
@@ -18,15 +25,35 @@ def get_ship_details(cno):
       'Sec-Fetch-Mode': 'cors',
       'Sec-Fetch-Site': 'same-origin'
     }
-    for attemp in range(50):
+    sleep(delay)
+    for attempt in range(50):
         try:
             response = requests.request("GET", url, headers=headers, timeout=5)
             break
         except:
-            if attemp < 49:
-                print(f"Something goes wrong\nRetrying... Attemp {attemp+1}")
+            if attempt < 49:
+                print(f"Something goes wrong\nRetrying... Attemp {attempt + 1}")
     soup = bs(response.text, "lxml")
-    table_headers = soup.find_all("td")[::2]
-    table_values = soup.find_all("td")[1::2]
-    ship_details = pd.DataFrame(table_values, columns=table_headers)
+    table_headers = [" ".join(_.text.split()) for _ in soup.find_all("td")[::2]]
+    table_values = [" ".join(_.text.split()) for _ in soup.find_all("td")[1::2]]
+    ship_details = pd.DataFrame([table_values], columns=table_headers)
+    col_names = pd.Series(ship_details.columns)
+    for _ in ship_details.columns[ship_details.columns.duplicated(keep=False)]:
+        col_names[ship_details.columns.get_loc(_)] = ([_ + '_' + str(d_idx) if d_idx != 0 else _
+                                             for d_idx in range(ship_details.columns.get_loc(_).sum())])
+    ship_details.columns = col_names
     return ship_details
+
+
+def parse_list(cnos_batch):
+    ships_details_df = pd.DataFrame()
+    for cno in cnos_batch:
+        ships_details_df = ships_details_df.append(get_ship_details(cno), ignore_index=True)
+        print(ships_details_df.shape)
+    return ships_details_df
+
+
+def read_cnos_from_xlsx():
+    regbook = pd.read_excel("IRS_parser\ger_book.xlsx")
+    cnos = regbook['IR Number'].to_list()
+    return cnos
