@@ -45,9 +45,13 @@ def get_all_cnos(first_page=1, last_page=279):
     return all_cnos
 
 
-def get_ship_details(cno_plus_delay):
-    cno = list(cno_plus_delay)[0]
-    delay = list(cno_plus_delay)[1]
+def get_ship_details(cno_and_delay):
+    if isinstance(cno_and_delay, tuple):
+        cno = cno_and_delay[0]
+        delay = cno_and_delay[1]
+    else:
+        cno = cno_and_delay
+        delay = 0
     print(f"{cno}    {delay}")
     url = "https://www.ccs.org.cn/ccswzen/internationalShipDetail"
     querystring = {"ccsno": str(cno)}

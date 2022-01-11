@@ -82,7 +82,7 @@ for cnos_batch in search_list:
         ship_details_batch = p.map(CCS.get_ship_details, zip(cnos_batch, delays))
     ship_details_df = pd.concat(ship_details_batch, axis=0, ignore_index=True)
     print(tabulate(ship_details_df, headers='keys', tablefmt='psql'))
-    write_to_sql(ship_details_df, "CCS_details")
+    # write_to_sql(ship_details_df, "CCS_details")
 
 
 
