@@ -66,12 +66,13 @@ def get_ship_details(cno_plus_delay):
         "Sec-GPC": "1"
     }
     sleep(delay)
-    for attemp in range(10):
+    for attemp in range(2000):
         try:
             response = requests.request("GET", url, headers=headers, params=querystring, timeout=5)
             break
         except:
-            print("Something went wrong\nRetrying...")
+            if attemp < 1999:
+                print(f"Something went wrong\nRetrying... Attemp {attemp + 1}")
     soup = bs(response.text, "lxml")
     table_headings = soup.find_all("th")
     table_values = soup.find_all("td")
