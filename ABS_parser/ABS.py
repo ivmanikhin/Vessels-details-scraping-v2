@@ -1,4 +1,5 @@
 import http.client
+import json
 
 
 def get_cnos_list():
@@ -27,12 +28,11 @@ def get_cnos_list():
         'Sec-Fetch-Site': "same-origin"
         }
 
-    conn.request("GET", "/portal/absrecord/os/ABSRECORDSEARCH?collectioncount=1&oslc.pageSize=2000&pageno=1&searchAttributes=vessel_name%2C&oslc.searchTerms=%22*%22&_lang=en-EN", payload, headers)
+    conn.request("GET", "/portal/absrecord/os/ABSRECORDSEARCH?collectioncount=1&oslc.pageSize=100&pageno=1&searchAttributes=vessel_name%2C&oslc.searchTerms=%22*%22&_lang=en-EN", payload, headers)
 
     res = conn.getresponse()
-    data = res.read()
-
-    print(data.decode("utf-8"))
+    data = json.loads(res.read())["member"]
+    return data
 
 
 def get_ship_details(cno):
@@ -66,6 +66,5 @@ def get_ship_details(cno):
                  payload, headers)
 
     res = conn.getresponse()
-    data = res.read()
-
-    print(data.decode("utf-8"))
+    data = json.loads(res.read())["member"]
+    return data

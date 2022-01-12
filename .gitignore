@@ -139,6 +139,6 @@ dmypy.json
 cython_debug/
 
 !/telegram_token.py
-!/data/
+!/data/ships.db
 !/.idea/
 !/__pycache__/

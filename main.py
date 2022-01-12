@@ -7,6 +7,7 @@ import sqlite3
 # import numpy as np
 import re
 import numpy as np
+from ABS_parser import ABS
 from tabulate import tabulate
 from multiprocessing import Pool
 from itertools import product
@@ -70,7 +71,13 @@ def read_txt_to_list(filename):
             output_list.append(line.strip())
     return output_list
 
-process_number = 20
+# cnos = pd.DataFrame(ABS.get_cnos_list())
+# print(cnos)
+
+ship_details_1 = ABS.get_ship_details("V0100361")
+ship_details_2 = pd.DataFrame(ABS.get_ship_details("V0100361")[0]["abs_vesselspec"])
+
+print(ship_details_1)
 # cnos_list = read_txt_to_list("CCS_parser/cnos_list.txt")
 # search_list = make_search_list(cnos_list, process_number)
 # delays = [0.3 * _ for _ in range(process_number)]
