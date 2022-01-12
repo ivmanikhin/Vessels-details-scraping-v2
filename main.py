@@ -77,18 +77,18 @@ process_number = 20
 # print(list(zip(search_list[0], delays)))
 
 
-cnos_list = IRS.read_cnos_from_xlsx()
-search_list = make_search_list(cnos_list, process_number)
-
-delays = [0.05 * _ for _ in range(process_number)]
-
-if __name__ == '__main__':
-    for cnos_batch in search_list:
-        with Pool(len(delays)) as p:
-            ship_details_batch = p.map(IRS.get_ship_details, zip(cnos_batch, delays))
-        ship_details_df = pd.concat(ship_details_batch, axis=0, ignore_index=True)
-        print(tabulate(ship_details_df, headers='keys', tablefmt='psql'))
-        write_to_sql(ship_details_df, "IRS_details")
+# cnos_list = IRS.read_cnos_from_xlsx()
+# search_list = make_search_list(cnos_list, process_number)
+#
+# delays = [0.05 * _ for _ in range(process_number)]
+#
+# if __name__ == '__main__':
+#     for cnos_batch in search_list:
+#         with Pool(len(delays)) as p:
+#             ship_details_batch = p.map(IRS.get_ship_details, zip(cnos_batch, delays))
+#         ship_details_df = pd.concat(ship_details_batch, axis=0, ignore_index=True)
+#         print(tabulate(ship_details_df, headers='keys', tablefmt='psql'))
+#         write_to_sql(ship_details_df, "IRS_details")
 
 
 
