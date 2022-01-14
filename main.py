@@ -75,7 +75,7 @@ def read_txt_to_list(filename):
 # print(cnos)
 
 ship_details_1 = ABS.get_ship_details("V0100361")
-ship_details_2 = pd.DataFrame(ABS.get_ship_details("V0100361")[0]["abs_vesselspec"])
+# ship_details_2 = pd.DataFrame(ABS.get_ship_details("V0100361")[0]["abs_vesselspec"])
 
 print(ship_details_1)
 # cnos_list = read_txt_to_list("CCS_parser/cnos_list.txt")
