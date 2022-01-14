@@ -7,7 +7,10 @@ import sqlite3
 # import numpy as np
 import re
 import numpy as np
+from ABS_parser import ABS
 from tabulate import tabulate
+import asyncio
+
 from multiprocessing import Pool
 from itertools import product
 
@@ -37,7 +40,7 @@ def new_column_to_sql(con, df, table_name):
                 data_type_sql = DATA_TYPES[data_type_py]
                 print(f"SQL data type: \"{data_type_sql}\"")
                 cur.execute(f"PRAGMA table_info({table_name})")
-                cur.execute(f"ALTER TABLE {table_name} ADD COLUMN `{col_name}`")
+                cur.execute(f"ALTER TABLE {table_name} ADD COLUMN `{col_name}` {data_type_sql}")
     except:
         pass
 
@@ -70,21 +73,41 @@ def read_txt_to_list(filename):
             output_list.append(line.strip())
     return output_list
 
-# process_number = 5
+
+
+
+# if __name__ == "__main__":
+cnos_list = read_txt_to_list("ABS_parser/cnos_list.txt")[:500]
+search_list = make_search_list(cnos_list, 100)
+for cnos_batch in search_list:
+    print(cnos_batch)
+    ship_details = asyncio.run(ABS.parse_ships_details(cnos_batch))
+    result = pd.DataFrame.from_dict(ship_details)
+    print(tabulate(result, headers='keys', tablefmt='psql'))
+    write_to_sql(result, "ABS_details")
+
+
+
+
+
 # cnos_list = read_txt_to_list("CCS_parser/cnos_list.txt")
 # search_list = make_search_list(cnos_list, process_number)
 # delays = [0.3 * _ for _ in range(process_number)]
 # print(list(zip(search_list[0], delays)))
 
 
-ship_details = IRS.get_ship_details("62431")
-print(tabulate(ship_details, headers="keys", tablefmt="psql"))
-# for cnos_batch in search_list:
-#     with Pool(len(delays)) as p:
-#         ship_details_batch = p.map(CCS.get_ship_details, zip(cnos_batch, delays))
-#     ship_details_df = pd.concat(ship_details_batch, axis=0, ignore_index=True)
-#     print(tabulate(ship_details_df, headers='keys', tablefmt='psql'))
-    # write_to_sql(ship_details_df, "CCS_details")
+# cnos_list = IRS.read_cnos_from_xlsx()
+# search_list = make_search_list(cnos_list, process_number)
+#
+# delays = [0.05 * _ for _ in range(process_number)]
+#
+# if __name__ == '__main__':
+#     for cnos_batch in search_list:
+#         with Pool(len(delays)) as p:
+#             ship_details_batch = p.map(IRS.get_ship_details, zip(cnos_batch, delays))
+#         ship_details_df = pd.concat(ship_details_batch, axis=0, ignore_index=True)
+#         print(tabulate(ship_details_df, headers='keys', tablefmt='psql'))
+#         write_to_sql(ship_details_df, "IRS_details")
 
 
 

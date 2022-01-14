@@ -1,8 +1,7 @@
 ### Python template
 # Byte-compiled / optimized / DLL files
 __pycache__/
-*.py[cod]
-*$py.class
+
 
 # C extensions
 *.so
@@ -138,5 +137,7 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
-!/telegram_token.py
-!/data/ships.db
+/telegram_token.py
+/.idea/
+/__pycache__/
+/data/
