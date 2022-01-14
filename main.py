@@ -71,13 +71,31 @@ def read_txt_to_list(filename):
             output_list.append(line.strip())
     return output_list
 
-# cnos = pd.DataFrame(ABS.get_cnos_list())
-# print(cnos)
+cnos_list = read_txt_to_list("ABS_parser\cnos_list.txt")[:3]
+print(cnos_list)
 
-ship_details_1 = ABS.get_ship_details("V0100361")
-# ship_details_2 = pd.DataFrame(ABS.get_ship_details("V0100361")[0]["abs_vesselspec"])
+ship_details_total = {}
+ship_details = []
 
-print(ship_details_1)
+for cno in cnos_list:
+    ship_details.append(ABS.get_ship_details(cno))
+print(ship_details)
+
+for _ in ship_details[0].keys():
+    ship_details_total[_] = [item[_] for item in ship_details]
+result = pd.DataFrame.from_dict(ship_details_total)
+
+# ship_details = ABS.get_ship_details("V0100361")
+# ship_details_1 = ABS.get_ship_details("V0155423")
+# for _ in ship_details.keys():
+#     ship_details[_] += ship_details_1[_]
+# result = pd.DataFrame.from_dict(ship_details)
+print(tabulate(result, headers='keys', tablefmt='psql'))
+
+
+
+
+
 # cnos_list = read_txt_to_list("CCS_parser/cnos_list.txt")
 # search_list = make_search_list(cnos_list, process_number)
 # delays = [0.3 * _ for _ in range(process_number)]

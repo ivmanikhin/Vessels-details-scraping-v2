@@ -30,11 +30,11 @@ def get_cnos_list():
         'Sec-Fetch-Site': "same-origin"
         }
 
-    conn.request("GET", "/portal/absrecord/os/ABSRECORDSEARCH?collectioncount=1&oslc.pageSize=100&pageno=1&searchAttributes=vessel_name%2C&oslc.searchTerms=%22*%22&_lang=en-EN", payload, headers)
+    conn.request("GET", "/portal/absrecord/os/ABSRECORDSEARCH?collectioncount=1&oslc.pageSize=20000&pageno=1&searchAttributes=vessel_name%2C&oslc.searchTerms=%22*%22&_lang=en-EN", payload, headers)
 
     res = conn.getresponse()
-    data = json.loads(res.read())["member"]
-    return data
+    output = [_["assetnum"] for _ in json.loads(res.read())["member"]]
+    return output
 
 
 def get_ship_details(cno):
@@ -78,7 +78,17 @@ def get_ship_details(cno):
 
     output["imo_num"] = [data["imo_num"]]
     output["vessel_name"] = [data["vessel_name"]]
+    output["vessel_type"] = [data["vessel_type"]]
+    output["class_notation"] = [" ".join(["".join(["(Malte cross)" if _["maltese_cross"] else "", _["spec"]])
+                                          if _["service_type"] == "Class Certification" else ""
+                                          for _ in data["abs_service_spec"]])]
+    output["flag"] = [data["flag_name"]]
     output["port_registry"] = [data["port_registry"]]
+    output["class_num"] = [data["class_num"]]
+    for _ in data["abs_tonnage"]:
+        if _["gross_tonnage"] != 0:
+            output["net_tonnage"] = [_["net_tonnage"]]
+            output["gross_tonnage"] = [_["gross_tonnage"]]
     data["abs_vesselspec"].pop(1)
     for _ in data["abs_vesselspec"]:
         output[_["description"].lower().translate(replace_chars)] = [_["numvalue"]]
@@ -86,28 +96,8 @@ def get_ship_details(cno):
     output["solas_category"] = [data["solas_category"]]
     output["vessel_description"] = [data["vessel_description"]]
     output["delivery_date"] = [data["delivery_date"]]
-    for _ in data["abs_tonnage"]:
-        if _["gross_tonnage"] != 0:
-            output["net_tonnage"] = [_["net_tonnage"]]
-            output["gross_tonnage"] = [_["gross_tonnage"]]
-    output["class_notation"] = [" ".join(["".join(["(Malte cross)" if _["maltese_cross"] else "", _["spec"]]) if _["service_type"] == "Class Certification" else "" for _ in data["abs_service_spec"]])]
-    # output[""] = data[""]
-    # output[""] = data[""]
-    # output[""] = data[""]
-    # output[""] = data[""]
-    # output[""] = data[""]
-    # output[""] = data[""]
-    # output[""] = data[""]
-    # output[""] = data[""]
-    # output[""] = data[""]
-    # output[""] = data[""]
-    # output[""] = data[""]
-    # output[""] = data[""]
-    # output[""] = data[""]
-    # output[""] = data[""]
-    # output[""] = data[""]
-    # output[""] = data[""]
-    # output[""] = data[""]
+    output["shipyard"] = [data["abs_shipyard_designation"][0]["abs_shipyard_description"]]
+    output["customer"] = [data["abs_customers"][0]["customer_name"]]
+    # output_df = pd.DataFrame.from_dict(output)
 
-    output_df = pd.DataFrame.from_dict(output)
-    return output_df
+    return output
