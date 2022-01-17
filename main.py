@@ -1,19 +1,10 @@
-# import time
-import DNV_parser.constants
-from IRS_parser import IRS
 import pandas as pd
-# import multiprocessing as mp
 import sqlite3
-# import numpy as np
 import re
 import numpy as np
 from ABS_parser import ABS
 from tabulate import tabulate
 import asyncio
-
-
-from multiprocessing import Pool
-from itertools import product
 
 DATA_TYPES = {
     "int": "Integer",
@@ -75,10 +66,7 @@ def read_txt_to_list(filename):
     return output_list
 
 
-
-# if __name__ == "__main__":
 cnos_list = read_txt_to_list("ABS_parser/cnos_list.txt")[:50]
-results = []
 print(cnos_list)
 asyncio.run(ABS.parse_cnos_list(cnos_list))
 result = pd.DataFrame.from_dict(ABS.results)
@@ -86,31 +74,3 @@ print(tabulate(result, headers='keys', tablefmt='psql'))
 write_to_sql(result, "ABS_details")
 
 
-
-
-
-# cnos_list = read_txt_to_list("CCS_parser/cnos_list.txt")
-# search_list = make_search_list(cnos_list, process_number)
-# delays = [0.3 * _ for _ in range(process_number)]
-# print(list(zip(search_list[0], delays)))
-
-
-# cnos_list = IRS.read_cnos_from_xlsx()
-# search_list = make_search_list(cnos_list, process_number)
-#
-# delays = [0.05 * _ for _ in range(process_number)]
-#
-# if __name__ == '__main__':
-#     for cnos_batch in search_list:
-#         with Pool(len(delays)) as p:
-#             ship_details_batch = p.map(IRS.get_ship_details, zip(cnos_batch, delays))
-#         ship_details_df = pd.concat(ship_details_batch, axis=0, ignore_index=True)
-#         print(tabulate(ship_details_df, headers='keys', tablefmt='psql'))
-#         write_to_sql(ship_details_df, "IRS_details")
-
-
-
-
-
-# ship_details = CCS.get_ship_details("00D6006")
-# print(tabulate(ship_details, headers='keys', tablefmt="psql"))
