@@ -11,6 +11,7 @@ from ABS_parser import ABS
 from tabulate import tabulate
 import asyncio
 
+
 from multiprocessing import Pool
 from itertools import product
 
@@ -75,16 +76,14 @@ def read_txt_to_list(filename):
 
 
 
-
 # if __name__ == "__main__":
-cnos_list = read_txt_to_list("ABS_parser/cnos_list.txt")[:500]
-search_list = make_search_list(cnos_list, 100)
-for cnos_batch in search_list:
-    print(cnos_batch)
-    ship_details = asyncio.run(ABS.parse_ships_details(cnos_batch))
-    result = pd.DataFrame.from_dict(ship_details)
-    print(tabulate(result, headers='keys', tablefmt='psql'))
-    write_to_sql(result, "ABS_details")
+cnos_list = read_txt_to_list("ABS_parser/cnos_list.txt")[:50]
+results = []
+print(cnos_list)
+asyncio.run(ABS.parse_cnos_list(cnos_list))
+result = pd.DataFrame.from_dict(ABS.results)
+print(tabulate(result, headers='keys', tablefmt='psql'))
+write_to_sql(result, "ABS_details")
 
 
 
