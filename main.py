@@ -5,6 +5,9 @@ import numpy as np
 from ABS_parser import ABS
 from tabulate import tabulate
 import asyncio
+import os
+
+SEP = os.sep
 
 DATA_TYPES = {
     "int": "Integer",
@@ -38,7 +41,7 @@ def new_column_to_sql(con, df, table_name):
 
 
 def write_to_sql(df, table_name):
-    con = sqlite3.connect('data/ships.db')
+    con = sqlite3.connect(f'data{SEP}ships.db')
     new_column_to_sql(con, df, table_name)
     df.to_sql(name=table_name, con=con, if_exists="append", index=False)
     con.close()
@@ -66,7 +69,7 @@ def read_txt_to_list(filename):
     return output_list
 
 
-cnos_list = read_txt_to_list("ABS_parser/cnos_list.txt")[:30]
+cnos_list = read_txt_to_list(f"ABS_parser{SEP}cnos_list.txt")[:30]
 print(cnos_list)
 asyncio.run(ABS.parse_cnos_list(cnos_list))
 ships_details_batch = []

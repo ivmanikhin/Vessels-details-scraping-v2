@@ -3,6 +3,22 @@ import json
 import httpx
 import asyncio
 
+HEADERS = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:95.0) Gecko/20100101 Firefox/95.0',
+            'Accept': 'application/json, text/plain, */*',
+            'Accept-Language': 'ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'X-XSRF-TOKEN': 'undefined',
+            'Connection': 'keep-alive',
+            'Referer': 'https://www.eagle.org/portal/',
+            'Cookie': 'PORTALSESSIONID=LfxO10IwA9DU7hSYA1DgZAfntgAh6jBw48S55_5uMX_E16WXRFmr!-1749509283!-1978394398; intercom-id-i9ip4aa0=72f0d6c1-a4bb-44e5-8ef7-3495a42a626e; intercom-session-i9ip4aa0=',
+            'Sec-Fetch-Dest': 'empty',
+            'Sec-Fetch-Mode': 'cors',
+            'Sec-Fetch-Site': 'same-origin',
+            'Sec-GPC': '1'
+        }
+
+
 def get_cnos_list():
     conn = http.client.HTTPSConnection("www.eagle.org")
 
@@ -49,52 +65,20 @@ async def get_ship_details(cno: str):
     global results
     async with httpx.AsyncClient(event_hooks={'request': [log_request], 'response': [log_response]}) as client:
         url = f"https://www.eagle.org/portal/absrecord/os/ABSRECORDVESSEL?&oslc.where=assetnum=%22{cno}%22&absrecord_search_vw.abs_vesselspec.orderBy=%2Bsection_seq,%2Bdisplaysequence&_lang=en-EN"
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:95.0) Gecko/20100101 Firefox/95.0',
-            'Accept': 'application/json, text/plain, */*',
-            'Accept-Language': 'ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'X-XSRF-TOKEN': 'undefined',
-            'Connection': 'keep-alive',
-            'Referer': 'https://www.eagle.org/portal/',
-            'Cookie': 'PORTALSESSIONID=LfxO10IwA9DU7hSYA1DgZAfntgAh6jBw48S55_5uMX_E16WXRFmr!-1749509283!-1978394398; intercom-id-i9ip4aa0=72f0d6c1-a4bb-44e5-8ef7-3495a42a626e; intercom-session-i9ip4aa0=',
-            'Sec-Fetch-Dest': 'empty',
-            'Sec-Fetch-Mode': 'cors',
-            'Sec-Fetch-Site': 'same-origin',
-            'Sec-GPC': '1'
-        }
-        ship_details_r = await client.get(url, headers=headers, timeout=60)
+        ship_details_r = await client.get(url, headers=HEADERS, timeout=60)
         url = f"https://www.eagle.org/portal/absrecord/script/ABSRECORDCAPACITYSQL?assetnum={cno}&_lang=en-EN"
-        headers = {
-            "cookie": "PORTALSESSIONID=GjdrErktlR7DyKNpV3zsp5HYcJ_qAreHf1hyEIIHPc2gkEBbN_ba!-127428686!-1749509283",
-            "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:95.0) Gecko/20100101 Firefox/95.0",
-            "Accept": "application/json, text/plain, */*",
-            "Accept-Language": "en-US,en;q=0.5",
-            "Accept-Encoding": "gzip, deflate, br",
-            "X-XSRF-TOKEN": "undefined",
-            "ADRUM": "isAjax:true",
-            "Connection": "keep-alive",
-            "Referer": "https://www.eagle.org/portal/",
-            "Cookie": "PORTALSESSIONID=H9hj_zZMzq2m8ZmRWWdoD1GPSL680MES68FkCikTmUD-26Sgo_Uq!-1978394398!-243536516; "
-                      "intercom-id-i9ip4aa0=a44dc2d6-6baf-41bc-9a25-26571f67d361; intercom-session-i9ip4aa0=; "
-                      "wp16130=\"UZUWTDDDDDDHIMTCXXZ - MTMM - XKLM - IVUL - WIZWMTYJJCAMDYJWITVLI - YIWM - XVUC - BWAI - "
-                      "VZCBBXCCJHUYDLHnsL_hkn\"; _ce.s=v11.rlc~1642355182661; _gcl_au=1.1.499676301.1641954817; "
-                      "_lfa=LF1.1.89443ec32aa40931.1641954642702; _ga=GA1.2.1564775793.1641954818; _gat=1",
-            "Sec-Fetch-Dest": "empty",
-            "Sec-Fetch-Mode": "cors",
-            "Sec-Fetch-Site": "same-origin"
-        }
-        ship_capacity_r = await client.get(url, headers=headers, timeout=60)
+        ship_capacity_r = await client.get(url, headers=HEADERS, timeout=60)
+        ship_details = ship_details_r.json()["member"][0]
         ship_capacity = ship_capacity_r.json()["member"]
         if len(ship_capacity) == 0:
             ship_capacity = [""]
-        data = [ship_details_r.json()["member"][0], ship_capacity]
-        data[0]["abs_vesselspec"].pop(1)
+        data = [ship_details, ship_capacity]
         results.append(data)
         return
 
 
 def raw_data_to_dict(data):
+    data[0]["abs_vesselspec"].pop(1)
     details = data[0]
     output = {}
     replace_chars = str.maketrans({
