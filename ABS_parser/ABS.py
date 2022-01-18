@@ -19,6 +19,25 @@ HEADERS = {
         }
 
 
+def dig_cabbage_dict(cabbage, key_prefix="", flat_dict={}):
+    for key in cabbage.keys():
+        key_name = key_prefix + "_" + key
+        if isinstance(cabbage[key], dict):
+            dig_cabbage_dict(cabbage[key], key_name, flat_dict)
+        elif isinstance(cabbage[key], list):
+            key_prefix = key_name
+            i = 0
+            for item in cabbage[key]:
+                key_name = f"{key_prefix}_{i}"
+                dig_cabbage_dict(item, key_name, flat_dict)
+                i += 1
+        else:
+            flat_dict[key_name] = cabbage[key]
+    return flat_dict
+
+
+
+
 def get_cnos_list():
     conn = http.client.HTTPSConnection("www.eagle.org")
 
@@ -68,58 +87,65 @@ async def get_ship_details(cno: str):
         ship_details_r = await client.get(url, headers=HEADERS, timeout=60)
         url = f"https://www.eagle.org/portal/absrecord/script/ABSRECORDCAPACITYSQL?assetnum={cno}&_lang=en-EN"
         ship_capacity_r = await client.get(url, headers=HEADERS, timeout=60)
+        url = f"https://www.eagle.org/portal/absrecord/os/ABSRECORDASSET?descendent&savedQuery=GETABSRECORDVESSELASSET&oslc.where=abs_destination_vessel=%22{cno}%22%20and%20parent!=%22*%22&oslc.orderBy=%2Bparent%20%20&_lang=en-EN"
+        ship_machinery_r = await client.get(url, headers=HEADERS, timeout=60)
         ship_details = ship_details_r.json()["member"][0]
         ship_capacity = ship_capacity_r.json()["member"]
+        ship_machinery = ship_machinery_r.json()["member"]
         if len(ship_capacity) == 0:
             ship_capacity = [""]
-        data = [ship_details, ship_capacity]
+        data = [ship_details, ship_capacity, ship_machinery]
         results.append(data)
         return
 
 
 def raw_data_to_dict(data):
-    data[0]["abs_vesselspec"].pop(1)
-    details = data[0]
+    # data[0]["abs_vesselspec"].pop(1)
+    # details = data[0]
     output = {}
-    replace_chars = str.maketrans({
-        " ": "_",
-        "(": "",
-        ")": "",
-    })
-    output["imo_num"] = details["imo_num"]
-    output["vessel_name"] = details["vessel_name"]
-    output["vessel_type"] = details["vessel_type"]
-    output["class_notation"] = " ".join(["".join(["(Malte cross)" if _["maltese_cross"] else "", _["spec"]])
-                                         if _["service_type"] == "Class Certification" else ""
-                                         for _ in details["abs_service_spec"]])
-    output["flag"] = details["flag_name"]
-    output["port_registry"] = details["port_registry"]
-    output["class_num"] = details["class_num"]
-    for _ in details["abs_tonnage"]:
-        if _["gross_tonnage"] != 0:
-            output["net_tonnage"] = _["net_tonnage"]
-            output["gross_tonnage"] = _["gross_tonnage"]
-    for _ in details["abs_vesselspec"]:
-        output[_["description"].lower().translate(replace_chars)] = _["numvalue"]
-    output["marpol_category"] = details["marpol_category"]
-    output["solas_category"] = details["solas_category"]
-    output["vessel_description"] = details["vessel_description"]
-    output["delivery_date"] = details["delivery_date"]
-    try:
-        output["shipyard"] = details["abs_shipyard_designation"][0]["abs_shipyard_description"]
-    except:
-        pass
-    try:
-        output["customer"] = details["abs_customers"][0]["customer_name"]
-    except:
-        pass
+    # replace_chars = str.maketrans({
+    #     " ": "_",
+    #     "(": "",
+    #     ")": "",
+    # })
+    # output["imo_num"] = details["imo_num"]
+    # output["vessel_name"] = details["vessel_name"]
+    # output["vessel_type"] = details["vessel_type"]
+    # output["class_notation"] = " ".join(["".join(["(Malte cross)" if _["maltese_cross"] else "", _["spec"]])
+    #                                      if _["service_type"] == "Class Certification" else ""
+    #                                      for _ in details["abs_service_spec"]])
+    # output["flag"] = details["flag_name"]
+    # output["port_registry"] = details["port_registry"]
+    # output["class_num"] = details["class_num"]
+    # for _ in details["abs_tonnage"]:
+    #     if _["gross_tonnage"] != 0:
+    #         output["net_tonnage"] = _["net_tonnage"]
+    #         output["gross_tonnage"] = _["gross_tonnage"]
+    # for _ in details["abs_vesselspec"]:
+    #     output[_["description"].lower().translate(replace_chars)] = _["numvalue"]
+    # output["marpol_category"] = details["marpol_category"]
+    # output["solas_category"] = details["solas_category"]
+    # output["vessel_description"] = details["vessel_description"]
+    # output["delivery_date"] = details["delivery_date"]
+    # try:
+    #     output["shipyard"] = details["abs_shipyard_designation"][0]["abs_shipyard_description"]
+    # except:
+    #     pass
+    # try:
+    #     output["customer"] = details["abs_customers"][0]["customer_name"]
+    # except:
+    #     pass
 
-    capacity = data[1]
-    if capacity != [""]:
-        for category in capacity:
-            output[category["category"].lower().translate(replace_chars)] = category["total_volume"]
+    # capacity = data[1]
+    # if capacity != [""]:
+    #     for category in capacity:
+    #         output[category["category"].lower().translate(replace_chars)] = category["total_volume"]
+
+    machinery = data[2]
+    for item in machinery:
+        output.update(dig_cabbage_dict(cabbage=item, key_prefix="machinery"))
+
     return output
-
 
 async def parse_cnos_list(cnos):
     tasks = []
