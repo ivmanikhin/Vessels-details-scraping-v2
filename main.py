@@ -66,11 +66,15 @@ def read_txt_to_list(filename):
     return output_list
 
 
-cnos_list = read_txt_to_list("ABS_parser/cnos_list.txt")[:50]
+cnos_list = read_txt_to_list("ABS_parser/cnos_list.txt")[:30]
 print(cnos_list)
 asyncio.run(ABS.parse_cnos_list(cnos_list))
-result = pd.DataFrame.from_dict(ABS.results)
+ships_details_batch = []
+for raw_data in ABS.results:
+    ships_details = ABS.raw_data_to_dict(raw_data)
+    ships_details_batch.append(ships_details)
+result = pd.DataFrame.from_dict(ships_details_batch)
 print(tabulate(result, headers='keys', tablefmt='psql'))
-write_to_sql(result, "ABS_details")
+# write_to_sql(result, "ABS_details")
 
 
