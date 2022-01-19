@@ -42,9 +42,8 @@ def flatten_cabbage_dict(cabbage, key_prefix="", flat_dict={}):
 
 def extract_from_cabbage_dict(cabbage, key_name, value_name, keywords=[], flat_dict={}):
     try:
-        flat_dict[f"{cabbage['abs_name'].lower().translate(REPLACE_CHARS)}_{cabbage['asset_spec'][0]['description'].lower().translate(REPLACE_CHARS)}"] = \
-        cabbage["asset_spec"][0]["numvalue"]
-        print(flat_dict)
+        flat_dict[f"{cabbage['abs_name']} {cabbage['assetspec'][0]['description']} {cabbage['assetspec'][0]['measureunitid']}"] = \
+        cabbage["assetspec"][0]["numvalue"]
     except:
         for key in cabbage.keys():
             if isinstance(cabbage[key], dict):
