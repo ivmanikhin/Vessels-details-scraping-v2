@@ -3,6 +3,7 @@ import json
 import httpx
 import asyncio
 
+
 HEADERS = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:95.0) Gecko/20100101 Firefox/95.0',
             'Accept': 'application/json, text/plain, */*',
@@ -19,20 +20,51 @@ HEADERS = {
         }
 
 
-def dig_cabbage_dict(cabbage, key_prefix="", flat_dict={}):
+REPLACE_CHARS = str.maketrans({
+    " ": "_",
+    "(": "",
+    ")": "",
+})
+
+def flatten_cabbage_dict(cabbage, key_prefix="", flat_dict={}):
     for key in cabbage.keys():
-        key_name = key_prefix + "_" + key
         if isinstance(cabbage[key], dict):
-            dig_cabbage_dict(cabbage[key], key_name, flat_dict)
+            flatten_cabbage_dict(cabbage[key], f"{key_prefix}_{key}", flat_dict)
         elif isinstance(cabbage[key], list):
-            key_prefix = key_name
             i = 0
             for item in cabbage[key]:
-                key_name = f"{key_prefix}_{i}"
-                dig_cabbage_dict(item, key_name, flat_dict)
+                flatten_cabbage_dict(item, f"{key_prefix}_{key}_{i}", flat_dict)
                 i += 1
         else:
-            flat_dict[key_name] = cabbage[key]
+            flat_dict[f"{key_prefix}_{key}"] = cabbage[key]
+    return flat_dict
+
+
+def extract_from_cabbage_dict(cabbage, key_name, value_name, keywords=[], flat_dict={}):
+    try:
+        flat_dict[f"{cabbage['abs_name'].lower().translate(REPLACE_CHARS)}_{cabbage['asset_spec'][0]['description'].lower().translate(REPLACE_CHARS)}"] = \
+        cabbage["asset_spec"][0]["numvalue"]
+        print(flat_dict)
+    except:
+        for key in cabbage.keys():
+            if isinstance(cabbage[key], dict):
+                extract_from_cabbage_dict(cabbage[key], key_name, value_name, keywords, flat_dict)
+            elif isinstance(cabbage[key], list):
+                for item in cabbage[key]:
+                    extract_from_cabbage_dict(item, key_name, value_name, keywords, flat_dict)
+            else:
+                pass
+
+        #
+        # if isinstance(cabbage[key], dict):
+        #     extract_from_cabbage_dict(cabbage[key], key_name, value_name, keywords, flat_dict)
+        # elif isinstance(cabbage[key], list):
+        #     for item in cabbage[key]:
+        #         extract_from_cabbage_dict(item, key_name, value_name, keywords, flat_dict)
+        # elif cabbage["abs_datatype"] == "NUMERIC":
+        #     flat_dict[cabbage[key_name].lower().translate(REPLACE_CHARS)] = cabbage["numvalue"]
+        # else:
+        #     pass
     return flat_dict
 
 
@@ -103,7 +135,7 @@ def raw_data_to_dict(data):
     # data[0]["abs_vesselspec"].pop(1)
     # details = data[0]
     output = {}
-    # replace_chars = str.maketrans({
+    # REPLACE_CHARS = str.maketrans({
     #     " ": "_",
     #     "(": "",
     #     ")": "",
@@ -122,7 +154,7 @@ def raw_data_to_dict(data):
     #         output["net_tonnage"] = _["net_tonnage"]
     #         output["gross_tonnage"] = _["gross_tonnage"]
     # for _ in details["abs_vesselspec"]:
-    #     output[_["description"].lower().translate(replace_chars)] = _["numvalue"]
+    #     output[_["description"].lower().translate(REPLACE_CHARS)] = _["numvalue"]
     # output["marpol_category"] = details["marpol_category"]
     # output["solas_category"] = details["solas_category"]
     # output["vessel_description"] = details["vessel_description"]
@@ -139,11 +171,11 @@ def raw_data_to_dict(data):
     # capacity = data[1]
     # if capacity != [""]:
     #     for category in capacity:
-    #         output[category["category"].lower().translate(replace_chars)] = category["total_volume"]
+    #         output[category["category"].lower().translate(REPLACE_CHARS)] = category["total_volume"]
 
     machinery = data[2]
     for item in machinery:
-        output.update(dig_cabbage_dict(cabbage=item, key_prefix="machinery"))
+        output.update(extract_from_cabbage_dict(cabbage=item, key_name="description", value_name="numvalue"))
 
     return output
 
