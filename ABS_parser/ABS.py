@@ -40,33 +40,32 @@ def flatten_cabbage_dict(cabbage, key_prefix="", flat_dict={}):
     return flat_dict
 
 
-def extract_from_cabbage_dict(cabbage, key_name, value_name, keywords=[], flat_dict={}):
+def extract_from_cabbage_dict(cabbage, flat_dict={}):
     try:
-        flat_dict[f"{cabbage['abs_name']} {cabbage['assetspec'][0]['description']} {cabbage['assetspec'][0]['measureunitid']}"] = \
-        cabbage["assetspec"][0]["numvalue"]
+        for item in cabbage['assetspec']:
+            flat_dict[f"{cabbage['abs_name']} {item['description']} {item['measureunitid']}"] = item["numvalue"]
     except:
         for key in cabbage.keys():
             if isinstance(cabbage[key], dict):
-                extract_from_cabbage_dict(cabbage[key], key_name, value_name, keywords, flat_dict)
+                extract_from_cabbage_dict(cabbage[key], flat_dict)
             elif isinstance(cabbage[key], list):
                 for item in cabbage[key]:
-                    extract_from_cabbage_dict(item, key_name, value_name, keywords, flat_dict)
+                    extract_from_cabbage_dict(item, flat_dict)
             else:
                 pass
-
-        #
-        # if isinstance(cabbage[key], dict):
-        #     extract_from_cabbage_dict(cabbage[key], key_name, value_name, keywords, flat_dict)
-        # elif isinstance(cabbage[key], list):
-        #     for item in cabbage[key]:
-        #         extract_from_cabbage_dict(item, key_name, value_name, keywords, flat_dict)
-        # elif cabbage["abs_datatype"] == "NUMERIC":
-        #     flat_dict[cabbage[key_name].lower().translate(REPLACE_CHARS)] = cabbage["numvalue"]
-        # else:
-        #     pass
     return flat_dict
 
 
+def get_something_value(input_dict, keywords, total=True):
+    output_value = 0
+    for key in input_dict.keys():
+        if all(keyword in key.lower().split() for keyword in keywords):
+            output_value += input_dict[key]
+            print(input_dict[key], output_value)
+            if not total:
+                break
+    print("Done")
+    return output_value
 
 
 def get_cnos_list():
@@ -131,52 +130,51 @@ async def get_ship_details(cno: str):
 
 
 def raw_data_to_dict(data):
-    # data[0]["abs_vesselspec"].pop(1)
-    # details = data[0]
+    data[0]["abs_vesselspec"].pop(1)
+    details = data[0]
     output = {}
-    # REPLACE_CHARS = str.maketrans({
-    #     " ": "_",
-    #     "(": "",
-    #     ")": "",
-    # })
-    # output["imo_num"] = details["imo_num"]
-    # output["vessel_name"] = details["vessel_name"]
-    # output["vessel_type"] = details["vessel_type"]
-    # output["class_notation"] = " ".join(["".join(["(Malte cross)" if _["maltese_cross"] else "", _["spec"]])
-    #                                      if _["service_type"] == "Class Certification" else ""
-    #                                      for _ in details["abs_service_spec"]])
-    # output["flag"] = details["flag_name"]
-    # output["port_registry"] = details["port_registry"]
-    # output["class_num"] = details["class_num"]
-    # for _ in details["abs_tonnage"]:
-    #     if _["gross_tonnage"] != 0:
-    #         output["net_tonnage"] = _["net_tonnage"]
-    #         output["gross_tonnage"] = _["gross_tonnage"]
-    # for _ in details["abs_vesselspec"]:
-    #     output[_["description"].lower().translate(REPLACE_CHARS)] = _["numvalue"]
-    # output["marpol_category"] = details["marpol_category"]
-    # output["solas_category"] = details["solas_category"]
-    # output["vessel_description"] = details["vessel_description"]
-    # output["delivery_date"] = details["delivery_date"]
-    # try:
-    #     output["shipyard"] = details["abs_shipyard_designation"][0]["abs_shipyard_description"]
-    # except:
-    #     pass
-    # try:
-    #     output["customer"] = details["abs_customers"][0]["customer_name"]
-    # except:
-    #     pass
+    output["imo_num"] = details["imo_num"]
+    output["vessel_name"] = details["vessel_name"]
+    output["vessel_type"] = details["vessel_type"]
+    output["class_notation"] = " ".join(["".join(["(Malte cross)" if _["maltese_cross"] else "", _["spec"]])
+                                         if _["service_type"] == "Class Certification" else ""
+                                         for _ in details["abs_service_spec"]])
+    output["flag"] = details["flag_name"]
+    output["port_registry"] = details["port_registry"]
+    output["class_num"] = details["class_num"]
+    for _ in details["abs_tonnage"]:
+        if _["gross_tonnage"] != 0:
+            output["net_tonnage"] = _["net_tonnage"]
+            output["gross_tonnage"] = _["gross_tonnage"]
+    for _ in details["abs_vesselspec"]:
+        output[_["description"].lower().translate(REPLACE_CHARS)] = _["numvalue"]
+    output["marpol_category"] = details["marpol_category"]
+    output["solas_category"] = details["solas_category"]
+    output["vessel_description"] = details["vessel_description"]
+    output["delivery_date"] = details["delivery_date"]
+    try:
+        output["shipyard"] = details["abs_shipyard_designation"][0]["abs_shipyard_description"]
+    except:
+        pass
+    try:
+        output["customer"] = details["abs_customers"][0]["customer_name"]
+    except:
+        pass
 
-    # capacity = data[1]
-    # if capacity != [""]:
-    #     for category in capacity:
-    #         output[category["category"].lower().translate(REPLACE_CHARS)] = category["total_volume"]
+    capacity = data[1]
+    if capacity != [""]:
+        for category in capacity:
+            output[category["category"].lower().translate(REPLACE_CHARS)] = category["total_volume"]
 
-    machinery = data[2]
-    for item in machinery:
-        output.update(extract_from_cabbage_dict(cabbage=item, key_name="description", value_name="numvalue"))
-
+    raw_machinery = data[2]
+    machinery = {}
+    for item in raw_machinery:
+        machinery.update(extract_from_cabbage_dict(cabbage=item))
+    output["total_engine_power_kw"] = get_something_value(machinery, ["engine", "kw"])
+    machinery.clear()
+    print(len(machinery), len(raw_machinery))
     return output
+
 
 async def parse_cnos_list(cnos):
     tasks = []
