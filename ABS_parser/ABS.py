@@ -40,7 +40,7 @@ def flatten_cabbage_dict(cabbage, key_prefix="", flat_dict={}):
     return flat_dict
 
 
-def extract_from_cabbage_dict(cabbage, flat_dict={}):
+def extract_from_cabbage_dict(cabbage, flat_dict):
     try:
         for item in cabbage['assetspec']:
             flat_dict[f"{cabbage['abs_name']} {item['description']} {item['measureunitid']}"] = item["numvalue"]
@@ -61,10 +61,9 @@ def get_something_value(input_dict, keywords, total=True):
     for key in input_dict.keys():
         if all(keyword in key.lower().split() for keyword in keywords):
             output_value += input_dict[key]
-            print(input_dict[key], output_value)
             if not total:
                 break
-    print("Done")
+    del input_dict
     return output_value
 
 
@@ -160,19 +159,13 @@ def raw_data_to_dict(data):
         output["customer"] = details["abs_customers"][0]["customer_name"]
     except:
         pass
-
-    capacity = data[1]
-    if capacity != [""]:
-        for category in capacity:
+    if data[1] != [""]:
+        for category in data[1]:
             output[category["category"].lower().translate(REPLACE_CHARS)] = category["total_volume"]
-
-    raw_machinery = data[2]
     machinery = {}
-    for item in raw_machinery:
-        machinery.update(extract_from_cabbage_dict(cabbage=item))
+    for item in data[2]:
+        machinery |= extract_from_cabbage_dict(item, {})
     output["total_engine_power_kw"] = get_something_value(machinery, ["engine", "kw"])
-    machinery.clear()
-    print(len(machinery), len(raw_machinery))
     return output
 
 

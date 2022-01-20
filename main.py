@@ -70,7 +70,7 @@ def read_txt_to_list(filename):
     return output_list
 
 
-cnos_list = read_txt_to_list(f"ABS_parser{SEP}cnos_list.txt")[7:10]
+cnos_list = read_txt_to_list(f"ABS_parser{SEP}cnos_list.txt")[:10]
 print(cnos_list)
 asyncio.run(ABS.parse_cnos_list(cnos_list))
 ships_details_batch = []
