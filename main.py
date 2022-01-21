@@ -10,7 +10,7 @@ import asyncio
 import os
 import pprint
 
-SEP = os.sep
+SEP = os.sep # os.path.abspath('c:/usr/')
 
 DATA_TYPES = {
     "int": "Integer",
@@ -23,6 +23,8 @@ pd.set_option("display.max_columns", None)
 pd.set_option("display.width", None)
 pd.set_option("display.max_rows", None)
 pd.set_option('max_colwidth', None)
+
+
 
 
 def new_column_to_sql(con, df, table_name):
@@ -72,40 +74,40 @@ def read_txt_to_list(filename):
     return output_list
 
 
-# cnos_list = read_txt_to_list(f"ABS_parser{SEP}cnos_list.txt")
-# print(f"Total {len(cnos_list)} vessels")
-# search_list = make_search_list(cnos_list, 100)
-# print(f"{len(search_list)} batches with {len(search_list[0])} elements each")
-# time.sleep(3)
-# i = 0
-# for cnos_list in search_list[86:]:
-#     i += 1
-#     print(f"Batch {i} of {len(search_list)}")
-#     time.sleep(2)
-#     asyncio.run(ABS.parse_cnos_list(cnos_list))
-#     ships_details_batch = []
-#     for raw_data in ABS.results:
-#         try:
-#             ships_details = ABS.raw_data_to_dict(raw_data)
-#             ships_details_batch.append(ships_details)
-#         except:
-#             pass
-#     result = pd.DataFrame.from_dict(ships_details_batch)
-#     print(tabulate(result, headers='keys', tablefmt='psql'))
-#     write_to_sql(result, "ABS_details")
-#     ABS.results.clear()
+cnos_list = read_txt_to_list(f"ABS_parser{SEP}cnos_list.txt")
+print(f"Total {len(cnos_list)} vessels")
+search_list = make_search_list(cnos_list, 100)
+print(f"{len(search_list)} batches with {len(search_list[0])} elements each")
+time.sleep(3)
+i = 0
+for cnos_list in search_list[56:]:
+    i += 1
+    print(f"Batch {i} of {len(search_list)}")
+    time.sleep(2)
+    asyncio.run(ABS.parse_cnos_list(cnos_list))
+    ships_details_batch = []
+    for raw_data in ABS.results:
+        try:
+            ships_details = ABS.raw_data_to_dict(raw_data)
+            ships_details_batch.append(ships_details)
+        except:
+            pass
+    result = pd.DataFrame.from_dict(ships_details_batch)
+    print(tabulate(result, headers='keys', tablefmt='psql'))
+    write_to_sql(result, "ABS_details")
+    ABS.results.clear()
 
-asyncio.run(ABS.parse_cnos_list(["V0226108"]))
-ships_details_batch = []
-for raw_data in ABS.results:
-    try:
-        ships_details = ABS.raw_data_to_dict(raw_data)
-        ships_details_batch.append(ships_details)
-    except:
-        pass
-result = pd.DataFrame.from_dict(ships_details_batch)
-print(tabulate(result, headers='keys', tablefmt='psql'))
-ABS.results.clear()
+# asyncio.run(ABS.parse_cnos_list(["V0226108"]))
+# ships_details_batch = []
+# for raw_data in ABS.results:
+#     try:
+#         ships_details = ABS.raw_data_to_dict(raw_data)
+#         ships_details_batch.append(ships_details)
+#     except:
+#         pass
+# result = pd.DataFrame.from_dict(ships_details_batch)
+# print(tabulate(result, headers='keys', tablefmt='psql'))
+# ABS.results.clear()
 
 
 
