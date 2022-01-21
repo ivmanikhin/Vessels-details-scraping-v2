@@ -118,13 +118,16 @@ async def get_ship_details(cno: str):
         ship_capacity_r = await client.get(url, headers=HEADERS, timeout=60)
         url = f"https://www.eagle.org/portal/absrecord/os/ABSRECORDASSET?descendent&savedQuery=GETABSRECORDVESSELASSET&oslc.where=abs_destination_vessel=%22{cno}%22%20and%20parent!=%22*%22&oslc.orderBy=%2Bparent%20%20&_lang=en-EN"
         ship_machinery_r = await client.get(url, headers=HEADERS, timeout=60)
-        ship_details = ship_details_r.json()["member"][0]
-        ship_capacity = ship_capacity_r.json()["member"]
-        ship_machinery = ship_machinery_r.json()["member"]
-        if len(ship_capacity) == 0:
-            ship_capacity = [""]
-        data = [ship_details, ship_capacity, ship_machinery]
-        results.append(data)
+        try:
+            ship_details = ship_details_r.json()["member"][0]
+            ship_capacity = ship_capacity_r.json()["member"]
+            ship_machinery = ship_machinery_r.json()["member"]
+            if len(ship_capacity) == 0:
+                ship_capacity = [""]
+            data = [ship_details, ship_capacity, ship_machinery]
+            results.append(data)
+        except:
+            pass
         return
 
 
@@ -166,6 +169,10 @@ def raw_data_to_dict(data):
     for item in data[2]:
         machinery |= extract_from_cabbage_dict(item, {})
     output["total_engine_power_kw"] = get_something_value(machinery, ["engine", "kw"])
+    output["anchor_weight_kg"] = get_something_value(machinery, ["anchor", "kg"], False)
+    output["anchor_chain_grade"] = get_something_value(machinery, ["chain", "grade"], False)
+    output["anchor_chain_size_mm"] = get_something_value(machinery, ["chain", "mm"], False)
+    output["anchor_chain_length_m"] = get_something_value(machinery, ["chain", "length"], False)
     return output
 
 
