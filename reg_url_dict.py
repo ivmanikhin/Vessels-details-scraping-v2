@@ -2,7 +2,7 @@ classes = {"NKK": "https://www.classnk.or.jp/register/regships/regships.aspx", #
            "NV": "https://vesselregister.dnv.com/vesselregister/vesselregister.html", #done
            "BV": "https://marine-offshore.bureauveritas.com/bv-fleet/#/bv-fleet/", #done
            "LRS": "https://www.lr.org/", #done
-           "ABS": "https://www.eagle.org/portal/#/absrecord/search",
+           "ABS": "https://www.eagle.org/portal/#/absrecord/search", #done
            "RINA": "https://www.rina.org/",
            "CCS": "https://mail.ccs.org.cn/", #done
            "KR": "https://www.krs.co.kr/Eng/Exclusive/Ship_Search.aspx", #very slow

@@ -56,10 +56,11 @@ def extract_from_cabbage_dict(cabbage, flat_dict):
     return flat_dict
 
 
-def get_something_value(input_dict, keywords, total=True):
+def get_something_value(input_dict, keywords, exceptions, total=True):
     output_value = 0
     for key in input_dict.keys():
-        if all(keyword in key.lower().split() for keyword in keywords):
+        if all(keyword in key.lower().split() for keyword in keywords) and all(exception not in key.lower().split()
+                                                                               for exception in exceptions):
             output_value += input_dict[key]
             if not total:
                 break
@@ -168,11 +169,10 @@ def raw_data_to_dict(data):
     machinery = {}
     for item in data[2]:
         machinery |= extract_from_cabbage_dict(item, {})
-    output["total_engine_power_kw"] = get_something_value(machinery, ["engine", "kw"])
-    output["anchor_weight_kg"] = get_something_value(machinery, ["anchor", "kg"], False)
-    output["anchor_chain_grade"] = get_something_value(machinery, ["chain", "grade"], False)
-    output["anchor_chain_size_mm"] = get_something_value(machinery, ["chain", "mm"], False)
-    output["anchor_chain_length_m"] = get_something_value(machinery, ["chain", "length"], False)
+    output["total_engine_power_kw"] = get_something_value(machinery, ["engine", "kw"], ["certificates", "certificate", "certification", "gears"])
+    output["anchor_weight_kg"] = get_something_value(machinery, ["anchor", "kg"], ["certificates", "certificate", "certification"], False)
+    output["anchor_chain_grade"] = get_something_value(machinery, ["chain", "grade"], ["certificates", "certificate", "certification"], False)
+    output["anchor_chain_size_mm"] = get_something_value(machinery, ["chain", "mm"], ["certificates", "certificate", "certification"], False)
     return output
 
 
