@@ -1,54 +1,19 @@
-import time
-
-import pandas as pd
-import sqlite3
-import re
 import numpy as np
 from ABS_parser import ABS
 from tabulate import tabulate
 import asyncio
 import os
+from easy_SQL.easy_SQL import *
 import pprint
 
 SEP = os.sep
 
-DATA_TYPES = {
-    "int": "Integer",
-    "float": "Real",
-    "str": "Text",
-    "object": "Text"
-}
+
 
 pd.set_option("display.max_columns", None)
 pd.set_option("display.width", None)
 pd.set_option("display.max_rows", None)
 pd.set_option('max_colwidth', None)
-
-
-def new_column_to_sql(con, df, table_name):
-    cur = con.cursor()
-    try:
-        cur.execute(f"PRAGMA table_info({table_name})")
-        db_columns = pd.DataFrame(cur.fetchall())[1].to_list()
-        for col_name in list(df.columns.values):
-            if col_name not in db_columns:
-                print(f"New column: \"{col_name}\"")
-                data_type_py = re.search("([a-zA-Z]+)", str(df.dtypes[col_name])).group(1)
-                print(f"Python data type: \"{data_type_py}\"")
-                data_type_sql = DATA_TYPES[data_type_py]
-                print(f"SQL data type: \"{data_type_sql}\"")
-                cur.execute(f"PRAGMA table_info({table_name})")
-                cur.execute(f"ALTER TABLE {table_name} ADD COLUMN `{col_name}` {data_type_sql}")
-    except:
-        pass
-
-
-def write_to_sql(df, table_name):
-    con = sqlite3.connect(f'data{SEP}ships.db')
-    new_column_to_sql(con, df, table_name)
-    df.to_sql(name=table_name, con=con, if_exists="append", index=False)
-    con.close()
-
 
 def make_search_list(list_of_something, batch_size=5):
     structured_list = []
@@ -95,17 +60,20 @@ def read_txt_to_list(filename):
 #     write_to_sql(result, "ABS_details")
 #     ABS.results.clear()
 
-asyncio.run(ABS.parse_cnos_list(["V0226108"]))
-ships_details_batch = []
-for raw_data in ABS.results:
-    try:
-        ships_details = ABS.raw_data_to_dict(raw_data)
-        ships_details_batch.append(ships_details)
-    except:
-        pass
-result = pd.DataFrame.from_dict(ships_details_batch)
-print(tabulate(result, headers='keys', tablefmt='psql'))
-ABS.results.clear()
+# asyncio.run(ABS.parse_cnos_list(["V0226108"]))
+# ships_details_batch = []
+# for raw_data in ABS.results:
+#     try:
+#         ships_details = ABS.raw_data_to_dict(raw_data)
+#         ships_details_batch.append(ships_details)
+#     except:
+#         pass
+# result = pd.DataFrame.from_dict(ships_details_batch)
+# print(tabulate(result, headers='keys', tablefmt='psql'))
+# ABS.results.clear()
+
+result = extract_table_from_sql(table_name="CCS_details", sql_column_names="`Class No.`, `Cylinders,Diameter,Power &Revolution of Main Engine`, `Type of Number of Main Engine`", df_column_names=["cno", "engines", "number"])
+result["engines"] = result["engines"].str.extract("\d*\*\d*\*([\d\.]*)")
 
 
 

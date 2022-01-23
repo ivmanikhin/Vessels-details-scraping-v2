@@ -101,7 +101,7 @@ print(df.transpose())
 #             data_type_py = re.search("([a-zA-Z]+)", str(spsheet.dtypes[col_name])).group(1)
 #             print(f"Python data type: \"{data_type_py}\"")
 #             data_type_sql = DATA_TYPES[data_type_py]
-#             print(f"SQL data type: \"{data_type_sql}\"")
+#             print(f"easy_SQL data type: \"{data_type_sql}\"")
 #             con = sqlite3.connect("ships_backup.db")
 #             cur = con.cursor()
 #             cur.execute(f"ALTER TABLE ships_details ADD COLUMN `{col_name}` {data_type_sql}")
