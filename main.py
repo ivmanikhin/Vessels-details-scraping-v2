@@ -1,4 +1,6 @@
 import numpy as np
+import pandas as pd
+
 from ABS_parser import ABS
 from tabulate import tabulate
 import asyncio
@@ -73,7 +75,14 @@ def read_txt_to_list(filename):
 # ABS.results.clear()
 
 result = extract_table_from_sql(table_name="CCS_details", sql_column_names="`Class No.`, `Cylinders,Diameter,Power &Revolution of Main Engine`, `Type of Number of Main Engine`", df_column_names=["cno", "engines", "number"])
-result["engines"] = result["engines"].str.extract("\d*\*\d*\*([\d\.]*)")
+result["engines"] = result["engines"].str.extract("\d*\*\d*\*([\d\.]*)").replace('', '0').fillna(0)
+result["engines"] = result["engines"].astype('float64')
+engine_number_list = [re.findall(r'(?:.+?\*)(\d+)', _) for _ in result["number"]]
+result["number"] = [sum([int(num) for num in num_list]) for num_list in engine_number_list]
+result["total_power"] = result["number"] * result["engines"]
+# write_to_sql(result, 'CCS_temp', 'replace')
+print(tabulate(result.head(20), headers='keys', tablefmt='psql'))
+
 
 
 

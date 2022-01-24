@@ -40,9 +40,9 @@ def extract_table_from_sql(table_name, sql_column_names, df_column_names):
         print("Failed to read SQL")
 
 
-def write_to_sql(df, table_name):
+def write_to_sql(df, table_name, if_exists="append"):
     con = sqlite3.connect(f'data{SEP}ships.db')
     new_column_to_sql(con, df, table_name)
-    df.to_sql(name=table_name, con=con, if_exists="append", index=False)
+    df.to_sql(name=table_name, con=con, if_exists=if_exists, index=False)
     con.close()
 
