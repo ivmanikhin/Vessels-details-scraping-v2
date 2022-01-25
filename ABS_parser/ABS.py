@@ -19,12 +19,14 @@ HEADERS = {
             'Sec-GPC': '1'
         }
 
-
 REPLACE_CHARS = str.maketrans({
     " ": "_",
     "(": "",
     ")": "",
 })
+
+results = []
+
 
 def flatten_cabbage_dict(cabbage, key_prefix="", flat_dict={}):
     for key in cabbage.keys():
@@ -183,4 +185,4 @@ async def parse_cnos_list(cnos):
     await asyncio.gather(*tasks)
 
 
-results = []
+
