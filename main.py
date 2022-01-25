@@ -82,7 +82,8 @@ result["number"] = [sum([int(num) for num in num_list]) for num_list in engine_n
 result["total_power"] = result["number"] * result["engines"]
 # write_to_sql(result, 'CCS_temp', 'replace')
 print(tabulate(result.head(20), headers='keys', tablefmt='psql'))
-
+print(result["number"].str.extract("(\d(?=;)|\d(?=[; a-zA-Z0-9]*)\*\d)"))
+print(tabulate(result.head(100), headers='keys', tablefmt='psql'))
 
 
 
