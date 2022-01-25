@@ -38,38 +38,20 @@ def read_txt_to_list(filename):
     return output_list
 
 
-cnos_list = IRS.read_cnos_from_xlsx()
-print(f"Total {len(cnos_list)} vessels")
-search_list = make_search_list(cnos_list, 300)
-print(f"{len(search_list)} batches with {len(search_list[0])} elements each")
-time.sleep(2)
-i = 0
-for cnos_list in search_list:
-    i += 1
-    print(f"Batch {i} of {len(search_list)}")
-    time.sleep(2)
-    asyncio.run(IRS.parse_cnos_list(cnos_list))
-    result = IRS.results
-    # for raw_data in IRS.results:
-    #
-    #     result = result.append(raw_data, ignore_index=True)
+dataset = extract_table_from_sql(table_name="RS_details", sql_column_names="RSNo, MainEngine", df_column_names=["cno", "power"])
+# dataset["power"] = dataset["power"].str.extract("power of ME: ([\d\.\* ]*) Mark ME").replace('', '0').fillna(0)
+# dataset["engines"] = dataset["engines"].astype('float64')
+engine_number_list = [[re.findall(r"(?:power of ME: )([\d\.\* ]*)(?: Mark ME)", _) if _ is not None else ['0']] for _ in dataset["power"]]
+dataset["power"] = ['+'.join(_[0]) for _ in engine_number_list]
+dataset = dataset.fillna("0")
+dataset["power"] = dataset["power"].map(eval)
+# dataset["total_power"] = dataset["number"] * dataset["engines"]
+write_to_sql(dataset, 'RS_temp', 'replace')
+print(dataset)
+# print(tabulate(dataset, headers='keys', tablefmt='psql'))
 
-
-    print(tabulate(result, headers='keys', tablefmt='psql'))
-    write_to_sql(result, "IRS_details")
-    IRS.results = pd.DataFrame()
-
-# asyncio.run(ABS.parse_cnos_list(["V0226108"]))
-# ships_details_batch = []
-# for raw_data in ABS.results:
-#     try:
-#         ships_details = ABS.raw_data_to_dict(raw_data)
-#         ships_details_batch.append(ships_details)
-#     except:
-#         pass
-# result = pd.DataFrame.from_dict(ships_details_batch)
-# print(tabulate(result, headers='keys', tablefmt='psql'))
-# ABS.results.clear()
+# dataset["MainEngine"] = database["Number and power of generators"].str.replace("\* ", "*").str.replace(" ", "+").fillna(value=0).astype(str)
+# dataset["Total engine power"] = database["Main Engine"].map(eval)
 
 
 
