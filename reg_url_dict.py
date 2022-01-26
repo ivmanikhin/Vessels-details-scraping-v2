@@ -6,7 +6,7 @@ classes = {"NKK": "https://www.classnk.or.jp/register/regships/regships.aspx", #
            "RINA": "https://www.rina.org/",
            "CCS": "https://mail.ccs.org.cn/", #done
            "KR": "https://www.krs.co.kr/Eng/Exclusive/Ship_Search.aspx", #very slow
-           "RMRS": "https://rs-class.org/",
+           "RMRS": "https://rs-class.org/", #done
            "IRS": "https://www.irclass.org/", #done
            "PRS": "https://www.prs.pl/",
            "CRS": "http://www.crs.hr/",
