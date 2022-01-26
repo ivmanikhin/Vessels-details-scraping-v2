@@ -9,6 +9,8 @@ import os
 from easy_SQL.easy_SQL import *
 import pprint
 import time
+import seaborn as sns
+from scipy import stats
 
 SEP = os.sep
 
@@ -55,25 +57,35 @@ def read_txt_to_list(filename):
 # # dataset["Total engine power"] = database["Main Engine"].map(eval)
 
 dataset = extract_table_from_sql(table_name="main_ships_data_raw",
-                                 sql_column_names="type, loa, boa, draft, displacement, speed, power",
-                                 df_column_names=["type", "loa", "boa", "draft", "displacement", "speed", "power"],
-                                 additional_parameters="where (draft * loa * boa * displacement * speed * power) > 1000")
-print(tabulate(dataset.head(50), headers='keys', tablefmt='psql'))
-dataset["displacement"] = dataset["displacement"].astype("float64")
+                                 sql_column_names="loa, boa, draft, speed, power",
+                                 df_column_names=["loa", "boa", "draft", "speed", "power"],
+                                 additional_parameters="where (loa * boa * draft > 1000) and loa > 10 and boa > 2 and draft > 0.5 and draft < 30 and speed < 100 and speed > 0.1 and power < 100000 and power > 1")
+# print(tabulate(dataset.head(50), headers='keys', tablefmt='psql'))
+dataset = dataset.sample(frac=0.1)
 dataset["loa"] = dataset["loa"].astype("float64")
 dataset["boa"] = dataset["boa"].astype("float64")
 dataset["draft"] = dataset["draft"].astype("float64")
 dataset["power"] = dataset["power"].astype("float64")
 dataset["speed"] = dataset["speed"].astype("float64")
-print(dataset.dtypes)
-dataset["fatness"] = dataset["displacement"] / (dataset["loa"] * dataset["boa"] * dataset["draft"])
-x = dataset["fatness"].to_list()
-y = dataset["power"].to_list()
-z = dataset["speed"].to_list()
+print(dataset.shape)
+dataset["vol"] = dataset["loa"] * dataset["boa"] * dataset["draft"]
+dataset["cx"] = dataset["power"] / dataset["speed"]
+dataset["fatness"] = dataset["loa"] / dataset["boa"]
+
+good_rows = (np.abs(stats.zscore(dataset)) < 3).all(axis=1)
+dataset = dataset[good_rows]
+print(dataset.shape)
+
+
+# X, Y = np.meshgrid(x, y)
 
 plt.rcParams["figure.figsize"] = (8,6)
 ax = plt.axes(projection='3d')
-ax.scatter3D(x, y, z)
+ax.scatter(dataset["vol"], dataset["power"], dataset["speed"], s=1, c=dataset["fatness"])
+ax.set_xlabel("volume")
+ax.set_ylabel("power")
+ax.set_zlabel("speed")
+# plt.tricontourf(dataset["vol"], dataset["cx"], dataset["fatness"])
 plt.show()
 
 
