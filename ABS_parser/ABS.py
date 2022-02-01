@@ -28,20 +28,6 @@ REPLACE_CHARS = str.maketrans({
 results = []
 
 
-def flatten_cabbage_dict(cabbage, key_prefix="", flat_dict={}):
-    for key in cabbage.keys():
-        if isinstance(cabbage[key], dict):
-            flatten_cabbage_dict(cabbage[key], f"{key_prefix}_{key}", flat_dict)
-        elif isinstance(cabbage[key], list):
-            i = 0
-            for item in cabbage[key]:
-                flatten_cabbage_dict(item, f"{key_prefix}_{key}_{i}", flat_dict)
-                i += 1
-        else:
-            flat_dict[f"{key_prefix}_{key}"] = cabbage[key]
-    return flat_dict
-
-
 def extract_from_cabbage_dict(cabbage, flat_dict):
     try:
         for item in cabbage['assetspec']:
